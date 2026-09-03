@@ -1,0 +1,6 @@
+{
+  "name": "Džemat Vreoca",
+  "description": "Zvanična prezentacija Džemata Vreoca - Islamska zajednica u BiH. Dnevna vaktija, arhiva hutbi, mekteb, lokacija džamije i sigurne donacije.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
