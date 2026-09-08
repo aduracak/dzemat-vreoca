@@ -85,7 +85,7 @@ export default async function handler(req: any, res: any) {
                     <td style="padding: 8px 0; font-weight: bold; color: #1c1917;">${email}</td>
                   </tr>` : ''}
                 </table>
-                <p style="font-size: 12px; color: #78716c; margin-bottom: 0;">Prijavu možete pregledati i ažurirati njen status u <a href="http://localhost:3000/#admin" style="color: #047857; font-weight: bold;">Imamovom Panelu</a>.</p>
+                <p style="font-size: 12px; color: #78716c; margin-bottom: 0;">Obavijest je automatski generisana sa web stranice Džemata Vreoca.</p>
               </div>
             </div>
           </div>
@@ -145,12 +145,13 @@ export default async function handler(req: any, res: any) {
                 <div style="background-color: #f5f5f4; padding: 16px; border-radius: 12px; font-style: italic; font-size: 14px; margin: 16px 0; color: #292524;">
                   „${question}“
                 </div>
-                <p style="font-size: 12px; color: #78716c; margin-bottom: 0;">Na ovo pitanje možete odgovoriti direktno u <a href="http://localhost:3000/#admin" style="color: #047857; font-weight: bold;">Imamovom Panelu</a>.</p>
+                <p style="font-size: 12px; color: #78716c; margin-bottom: 0;">Obavijest je automatski generisana sa web stranice Džemata Vreoca.</p>
               </div>
             </div>
           </div>
         `,
       });
+
 
       return res.status(200).json({ success: true, message: 'Pitanje uspješno poslano imamu.' });
     }

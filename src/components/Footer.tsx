@@ -301,21 +301,20 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDonation, onNavigate, onOp
 
         {/* Copyright & Scroll to Top */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500">
-          <div>
-            © {new Date().getFullYear()} Džemat Vreoca. Sva prava zadržana. Islamska zajednica u Bosni i Hercegovini.
-          </div>
-
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-2">
+            <span>© {new Date().getFullYear()} Džemat Vreoca. Sva prava zadržana. Islamska zajednica u Bosni i Hercegovini.</span>
             {onOpenAdminLogin && (
               <button
                 onClick={onOpenAdminLogin}
-                className="flex items-center gap-1.5 text-stone-400 hover:text-emerald-300 transition-colors cursor-pointer text-xs"
+                className="opacity-20 hover:opacity-100 text-stone-400 hover:text-emerald-400 transition-opacity p-1 cursor-pointer"
+                title="Admin"
               >
-                <Lock className="w-3.5 h-3.5" />
-                <span>Portal za Imama</span>
+                <Lock className="w-2.5 h-2.5" />
               </button>
             )}
+          </div>
 
+          <div className="flex items-center gap-4">
             <button
               onClick={scrollToTop}
               className="flex items-center gap-1 text-emerald-300 hover:text-white transition-colors cursor-pointer"
@@ -325,6 +324,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDonation, onNavigate, onOp
             </button>
           </div>
         </div>
+
       </div>
     </footer>
   );
