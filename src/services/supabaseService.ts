@@ -259,6 +259,18 @@ export async function submitMektebEnrollment(data: MektebPrijava): Promise<{ suc
       setLocal(LOCAL_STORAGE_KEYS.MEKTEB, [newEntry, ...existing]);
     }
 
+    // Automatsko slanje email notifikacije preko Resend API-ja
+    try {
+      fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'mekteb_prijava',
+          data,
+        }),
+      }).catch((e) => console.warn('Email trigger warning:', e));
+    } catch {}
+
     return { success: true };
   } catch (err: any) {
     console.error('Greška pri prijavi u mekteb:', err);
@@ -299,12 +311,25 @@ export async function submitQuestionToImam(data: {
       setLocal(LOCAL_STORAGE_KEYS.PITANJA, [newEntry, ...existing]);
     }
 
+    // Automatsko slanje email notifikacije imamu
+    try {
+      fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'pitanje_imamu',
+          data,
+        }),
+      }).catch((e) => console.warn('Email trigger warning:', e));
+    } catch {}
+
     return { success: true };
   } catch (err: any) {
     console.error('Greška pri postavljanju pitanja:', err);
     return { success: false, error: err.message || 'Greška pri postavljanju pitanja.' };
   }
 }
+
 
 /**
  * 3. Dohvatanje javnih objavljenih pitanja
