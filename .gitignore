@@ -6,3 +6,5 @@ coverage/
 *.log
 .env*
 !.env.example
+projekat-byy-abi/
+README.md
