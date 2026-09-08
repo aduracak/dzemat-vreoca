@@ -1,24 +1,22 @@
 # PROJECT STATUS - Džemat Vreoca
 
 ## Trenutno stanje projekta
-- **Faza**: Faza 2 - Završena (Supabase Cloud Arhitektura, Q&A Sekcija, Tekstualne Hutbe, Donacije u pripremi, Admin Panel za Imama)
-- **Status**: Sve komponente spremne, testirane i optimizovane za Vercel & GitHub.
+- **Faza**: Faza 3 - Kompletirana (Supabase Cloud Arhitektura, Email i Newsletter obavijesti, Upravljanje Aktivnostima, Redizajn Admin Panela sa Sidebarom i Mobile Drawerom)
+- **Status**: Sve komponente spremne, testirane i optimizovane za Vercel produkciju i GitHub.
 
-## Šta je urađeno:
-1. **Supabase Cloud Integracija**:
-   - Kreiran `src/services/supabaseService.ts` sa potpunom podrškom za `@supabase/supabase-js` i pametnim fallback sistemom.
-   - Pripremljena kompletna SQL šema `supabase-schema.sql` sa RLS sigurnosnim politikama.
-2. **Nova sekcija "Pitanja i odgovori Imama"**:
-   - Javni pregled odobrenih odgovora po kategorijama.
-   - Forma za slanje novih pitanja imamu (stiže na webmail `vreoca@medzlis-sarajevo.ba`).
-3. **Mekteb sekcija**:
-   - Povezana online prijava djece u mekteb direktno u bazu i na džematski mail.
-4. **Tekstualne hutbe**:
-   - Potpuno uklonjeni svi audio elementi i plejeri — hutbe su sada 100% čist, čitljiv tekst sa opcijom pretrage, čitanja i printanja.
-5. **Donacije (U pripremi)**:
-   - Donacijski modal prilagođen u status „U pripremi“ (i online i žiro račun).
-6. **Admin Panel za Imama (`/admin` ili hash `#admin`)**:
-   - Sigurna prijava sa lozinkom (`vreoca2026`).
-   - Pregled mekteb prijava sa statusima i kontaktom roditelja.
-   - Pregled i odgovaranje na pitanja sa opcijom objave na sajt.
-   - Dodavanje i brisanje novih tekstualnih hutbi.
+## Šta je urađeno u ovoj fazi:
+1. **Supabase integracija**:
+   - `supabase-schema.sql` proširen sa tabelama `aktivnosti` i `newsletter_pretplatnici`.
+   - `src/services/supabaseService.ts` opremljen funkcijama za aktivnosti, newsletter, CSV export i fallbackom.
+2. **Newsletter & Obavijesti džemata**:
+   - Nova komponenta `src/components/NewsletterSection.tsx` za prijavu džematlija na obavijesti.
+   - Slanje novosti i novih hutbi pretplatnicima iz Admin Panela.
+3. **Upravljanje Aktivnostima i Aktuelnostima**:
+   - `src/components/ActivitiesSection.tsx` dinamički učitava događaje iz baze.
+   - Imam u Admin Panelu može dodavati i brisati aktivnosti.
+4. **Redizajn Admin Panela (Sidebar + 100% Mobile Ready)**:
+   - Responzivni sidebar sa bedževima i brojačima.
+   - Mobilni drawer za telefone.
+   - Pregled i statistika na početnom ekranu.
+   - Export prijava za mekteb u CSV/Excel.
+   - Slanje odgovora na email džematlije direktno iz pitanja.

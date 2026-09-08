@@ -13,6 +13,7 @@ import { AboutSection } from './components/AboutSection';
 import { MektebSection } from './components/MektebSection';
 import { ActivitiesSection } from './components/ActivitiesSection';
 import { LocationMapSection } from './components/LocationMapSection';
+import { NewsletterSection } from './components/NewsletterSection';
 import { Footer } from './components/Footer';
 import { DonationModal } from './components/DonationModal';
 import { AdminLoginModal } from './components/admin/AdminLoginModal';
@@ -90,6 +91,9 @@ export default function App() {
 
         {/* Community Activities */}
         <ActivitiesSection onOpenDonation={() => setIsDonationOpen(true)} />
+
+        {/* Newsletter & Obavijesti Džemata */}
+        <NewsletterSection />
 
         {/* Location & Interactive Map */}
         <LocationMapSection />

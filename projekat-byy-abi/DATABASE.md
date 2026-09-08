@@ -1,50 +1,55 @@
-# DATABASE - Šema baze podataka (SQLite)
+# DATABASE - Šema baze podataka (Supabase PostgreSQL)
 
 ## Tabele
 
 ### 1. `mekteb_prijave`
-| Polje | Tip | Opis |
-|---|---|---|
-| `id` | INTEGER PRIMARY KEY AUTOINCREMENT | ID prijave |
-| `parent_name` | TEXT NOT NULL | Ime i prezime roditelja |
-| `child_name` | TEXT NOT NULL | Ime i prezime djeteta |
-| `birth_year` | INTEGER NOT NULL | Godište djeteta |
-| `phone` | TEXT NOT NULL | Telefon roditelja |
-| `email` | TEXT | Email roditelja (opciono) |
-| `group_level` | TEXT NOT NULL | Nivo mekteba (I, II, III) |
-| `status` | TEXT DEFAULT 'na_cekanju' | 'na_cekanju', 'prihvaceno', 'arhivirano' |
-| `notes` | TEXT | Bilješke imama |
-| `created_at` | DATETIME DEFAULT CURRENT_TIMESTAMP | Datum i vrijeme prijave |
+- `id` (BIGINT PRIMARY KEY)
+- `parent_name` (TEXT)
+- `child_name` (TEXT)
+- `birth_year` (INTEGER)
+- `phone` (TEXT)
+- `email` (TEXT)
+- `group_level` (TEXT)
+- `status` (TEXT: 'na_cekanju', 'upisano', 'arhivirano')
+- `notes` (TEXT)
+- `created_at` (TIMESTAMP)
 
 ### 2. `pitanja_imamu`
-| Polje | Tip | Opis |
-|---|---|---|
-| `id` | INTEGER PRIMARY KEY AUTOINCREMENT | ID pitanja |
-| `sender_name` | TEXT NOT NULL | Ime pošiljaoca (ili Anonimno) |
-| `sender_contact` | TEXT NOT NULL | Email ili telefon |
-| `question` | TEXT NOT NULL | Tekst pitanja |
-| `answer` | TEXT | Odgovor imama |
-| `is_published` | INTEGER DEFAULT 0 | 1 = javno prikazano na sajtu, 0 = privatno |
-| `category` | TEXT DEFAULT 'Opće' | Kategorija pitanja (Namazi, Post, Porodica, Ahlak) |
-| `answered_at` | DATETIME | Vrijeme kad je odgovoreno |
-| `created_at` | DATETIME DEFAULT CURRENT_TIMESTAMP | Vrijeme postavljanja |
+- `id` (BIGINT PRIMARY KEY)
+- `sender_name` (TEXT)
+- `sender_contact` (TEXT)
+- `question` (TEXT)
+- `answer` (TEXT)
+- `is_published` (BOOLEAN)
+- `category` (TEXT)
+- `answered_at` (TIMESTAMP)
+- `created_at` (TIMESTAMP)
 
 ### 3. `hutbe`
-| Polje | Tip | Opis |
-|---|---|---|
-| `id` | INTEGER PRIMARY KEY AUTOINCREMENT | ID hutbe |
-| `title` | TEXT NOT NULL | Naslov hutbe |
-| `date_str` | TEXT NOT NULL | Datum hutbe (npr. "04.09.2026.") |
-| `category` | TEXT NOT NULL | Tema (Ahlak, Porodica, Zajedništvo...) |
-| `summary` | TEXT NOT NULL | Kratak sažetak |
-| `content` | TEXT NOT NULL | Puni tekst hutbe |
-| `author` | TEXT DEFAULT 'Imam džemata Vreoca' | Autor |
-| `created_at` | DATETIME DEFAULT CURRENT_TIMESTAMP | Vrijeme unosa |
+- `id` (BIGINT PRIMARY KEY)
+- `title` (TEXT)
+- `date_str` (TEXT)
+- `category` (TEXT)
+- `summary` (TEXT)
+- `content` (TEXT)
+- `author` (TEXT)
+- `created_at` (TIMESTAMP)
 
-### 4. `admin_users`
-| Polje | Tip | Opis |
-|---|---|---|
-| `id` | INTEGER PRIMARY KEY AUTOINCREMENT | ID korisnika |
-| `username` | TEXT UNIQUE NOT NULL | Korisničko ime za imama |
-| `password_hash` | TEXT NOT NULL | Hashirana lozinka (bcrypt) |
-| `created_at` | DATETIME DEFAULT CURRENT_TIMESTAMP | Vrijeme kreiranja |
+### 4. `aktivnosti` (NOVO)
+- `id` (BIGINT PRIMARY KEY)
+- `title` (TEXT NOT NULL)
+- `date_str` (TEXT NOT NULL)
+- `time_str` (TEXT)
+- `location` (TEXT DEFAULT 'Džamija Vreoca')
+- `category` (TEXT: 'Edukacija', 'Humanitarno', 'Omladina', 'Džemat')
+- `summary` (TEXT NOT NULL)
+- `description` (TEXT NOT NULL)
+- `is_active` (BOOLEAN DEFAULT TRUE)
+- `created_at` (TIMESTAMP)
+
+### 5. `newsletter_pretplatnici` (NOVO)
+- `id` (BIGINT PRIMARY KEY)
+- `email` (TEXT UNIQUE NOT NULL)
+- `name` (TEXT)
+- `is_active` (BOOLEAN DEFAULT TRUE)
+- `created_at` (TIMESTAMP)
