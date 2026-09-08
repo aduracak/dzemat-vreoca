@@ -1,15 +1,21 @@
 /// <reference types="vite/client" />
 import { createClient } from '@supabase/supabase-js';
 
-// Environment varijable za Supabase (podržava i VITE_ i NEXT_PUBLIC_ prefikse)
+// Environment varijable za Supabase (podržava VITE_, NEXT_PUBLIC_ i čiste nazive bez prefiksa)
 const env = (import.meta as any).env || {};
 const supabaseUrl =
-  env.VITE_SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL || '';
+  env.VITE_SUPABASE_URL ||
+  env.NEXT_PUBLIC_SUPABASE_URL ||
+  env.SUPABASE_URL ||
+  '';
 const supabaseAnonKey =
   env.VITE_SUPABASE_ANON_KEY ||
   env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  env.SUPABASE_ANON_KEY ||
+  env.SUPABASE_KEY ||
   '';
+
 
 
 // Inicijalizacija Supabase klijenta (ako su ključevi definisani)
@@ -665,9 +671,10 @@ export async function deleteNewsletterSubscriber(id: number | string): Promise<{
 const DEFAULT_ADMIN_PASS = 'vreoca2026';
 
 export function verifyAdminPassword(password: string): boolean {
-  const envPass = env.VITE_ADMIN_PASSWORD;
+  const envPass = env.VITE_ADMIN_PASSWORD || env.ADMIN_PASSWORD;
   const target = envPass || DEFAULT_ADMIN_PASS;
   const isMatch = password === target;
+
   if (isMatch) {
     try {
       sessionStorage.setItem(LOCAL_STORAGE_KEYS.ADMIN_AUTH, 'true');
