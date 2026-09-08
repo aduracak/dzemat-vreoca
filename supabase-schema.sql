@@ -1,6 +1,6 @@
 -- ====================================================================
 -- DŽEMAT VREOCA - SUPABASE BAZA PODATAKA (KOMPLETNA ŠEMA)
--- Kopirajte i pokrenite ovaj SQL u Supabase SQL Editoru (https://supabase.com)
+-- Upute: Označite sav tekst (Ctrl + A) u Supabase SQL Editoru i kliknite RUN
 -- ====================================================================
 
 -- 1. Tabela za prijave u mekteb
@@ -72,32 +72,50 @@ ALTER TABLE hutbe ENABLE ROW LEVEL SECURITY;
 ALTER TABLE aktivnosti ENABLE ROW LEVEL SECURITY;
 ALTER TABLE newsletter_pretplatnici ENABLE ROW LEVEL SECURITY;
 
--- Politike pristupa (Policies):
+-- Sigurno uklanjanje postojećih politika prije kreiranja (zaštita od duplikata)
+DROP POLICY IF EXISTS "Anonimno slanje prijave za mekteb" ON mekteb_prijave;
+DROP POLICY IF EXISTS "Admin upravljanje mekteb prijavama" ON mekteb_prijave;
+DROP POLICY IF EXISTS "Anonimno slanje pitanja imamu" ON pitanja_imamu;
+DROP POLICY IF EXISTS "Javno čitanje objavljenih pitanja" ON pitanja_imamu;
+DROP POLICY IF EXISTS "Admin upravljanje pitanjima" ON pitanja_imamu;
+DROP POLICY IF EXISTS "Javno čitanje hutbi" ON hutbe;
+DROP POLICY IF EXISTS "Admin upravljanje hutbama" ON hutbe;
+DROP POLICY IF EXISTS "Javno čitanje aktivnosti" ON aktivnosti;
+DROP POLICY IF EXISTS "Admin upravljanje aktivnostima" ON aktivnosti;
+DROP POLICY IF EXISTS "Anonimna prijava na newsletter" ON newsletter_pretplatnici;
+DROP POLICY IF EXISTS "Admin upravljanje newsletterom" ON newsletter_pretplatnici;
+
+-- Kreiranje politika pristupa:
 CREATE POLICY "Anonimno slanje prijave za mekteb" 
-  ON mekteb_prijave FOR INSERT 
+  ON mekteb_prijave FOR ALL 
+  USING (true)
   WITH CHECK (true);
 
 CREATE POLICY "Anonimno slanje pitanja imamu" 
-  ON pitanja_imamu FOR INSERT 
+  ON pitanja_imamu FOR ALL 
+  USING (true)
   WITH CHECK (true);
-
-CREATE POLICY "Javno čitanje objavljenih pitanja" 
-  ON pitanja_imamu FOR SELECT 
-  USING (is_published = true);
 
 CREATE POLICY "Javno čitanje hutbi" 
-  ON hutbe FOR SELECT 
-  USING (true);
-
-CREATE POLICY "Javno čitanje aktivnosti" 
-  ON aktivnosti FOR SELECT 
-  USING (is_active = true);
-
-CREATE POLICY "Anonimna prijava na newsletter" 
-  ON newsletter_pretplatnici FOR INSERT 
+  ON hutbe FOR ALL 
+  USING (true)
   WITH CHECK (true);
 
--- Inicijalni podaci za hutbe (Seed)
+CREATE POLICY "Javno čitanje aktivnosti" 
+  ON aktivnosti FOR ALL 
+  USING (true)
+  WITH CHECK (true);
+
+CREATE POLICY "Anonimna prijava na newsletter" 
+  ON newsletter_pretplatnici FOR ALL 
+  USING (true)
+  WITH CHECK (true);
+
+-- ====================================================================
+-- INICIJALNI PODACI (SEED)
+-- ====================================================================
+
+-- Hutbe
 INSERT INTO hutbe (title, date_str, category, summary, content, author)
 VALUES 
 (
@@ -117,7 +135,7 @@ VALUES
   'Imam džemata Vreoca'
 );
 
--- Inicijalni podaci za javna pitanja i odgovore (Seed)
+-- Pitanja i odgovori
 INSERT INTO pitanja_imamu (sender_name, sender_contact, question, answer, is_published, category, answered_at)
 VALUES
 (
@@ -139,7 +157,7 @@ VALUES
   timezone('utc'::text, now())
 );
 
--- Inicijalni podaci za aktivnosti (Seed)
+-- Aktivnosti
 INSERT INTO aktivnosti (title, date_str, time_str, location, category, summary, description)
 VALUES
 (
