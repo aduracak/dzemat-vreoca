@@ -1,33 +1,46 @@
 import React, { useState } from 'react';
 import { IslamskaZajednicaLogo } from './IslamskaZajednicaLogo';
-import { MapPin, Phone, Mail, Clock, Heart, ArrowUp, Send, CheckCircle2 } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Heart, ArrowUp, Send, CheckCircle2, Lock } from 'lucide-react';
+import { submitQuestionToImam } from '../services/supabaseService';
 
 interface FooterProps {
   onOpenDonation: () => void;
   onNavigate: (sectionId: string) => void;
+  onOpenAdminLogin?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenDonation, onNavigate }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenDonation, onNavigate, onOpenAdminLogin }) => {
   const [contactSubmitted, setContactSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [contactForm, setContactForm] = useState({
     name: '',
-    email: '',
     phone: '',
     message: '',
   });
 
-  const handleContactSubmit = (e: React.FormEvent) => {
+  const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+
+    await submitQuestionToImam({
+      sender_name: contactForm.name || 'Džematlija',
+      sender_contact: contactForm.phone,
+      question: contactForm.message,
+      category: 'Opće',
+    });
+
+    setSubmitting(false);
     setContactSubmitted(true);
     setTimeout(() => {
       setContactSubmitted(false);
-      setContactForm({ name: '', email: '', phone: '', message: '' });
+      setContactForm({ name: '', phone: '', message: '' });
     }, 3000);
   };
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
 
   return (
     <footer id="kontakt" className="bg-[#152a1f] text-stone-300 pt-20 pb-12 border-t border-emerald-950">
@@ -48,16 +61,17 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDonation, onNavigate }) =>
             <div className="space-y-3 text-xs text-emerald-100">
               <div className="flex items-center gap-3">
                 <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Vreoca bb, 71210 Ilidža, Bosna i Hercegovina</span>
+                <span>Vreoca 52, 71210 Ilidža, Bosna i Hercegovina</span>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>+387 (0)33 762 100 • Imam: +387 (0)61 234 567</span>
+                <span> • Imam: +387 (0)64 45 58 002</span>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>dzemat.vreoca@medzlis-sarajevo.ba</span>
+                <span>vreoca@medzlis-sarajevo.ba</span>
               </div>
+
               <div className="flex items-center gap-3">
                 <Clock className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>Radno vrijeme imama: svakodnevno prije i poslije namaza</span>
@@ -291,7 +305,17 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDonation, onNavigate }) =>
             © {new Date().getFullYear()} Džemat Vreoca. Sva prava zadržana. Islamska zajednica u Bosni i Hercegovini.
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5">
+            {onOpenAdminLogin && (
+              <button
+                onClick={onOpenAdminLogin}
+                className="flex items-center gap-1.5 text-stone-400 hover:text-emerald-300 transition-colors cursor-pointer text-xs"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Portal za Imama</span>
+              </button>
+            )}
+
             <button
               onClick={scrollToTop}
               className="flex items-center gap-1 text-emerald-300 hover:text-white transition-colors cursor-pointer"
@@ -305,3 +329,4 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDonation, onNavigate }) =>
     </footer>
   );
 };
+

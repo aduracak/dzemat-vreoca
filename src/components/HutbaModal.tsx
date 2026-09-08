@@ -1,22 +1,21 @@
 import React, { useState } from 'react';
-import { Hutba } from '../types';
-import { X, Copy, Check, Printer, BookOpen, Clock, Calendar, User, Volume2, Share2 } from 'lucide-react';
+import { X, Copy, Check, Printer, BookOpen, Clock, Calendar, User, Share2 } from 'lucide-react';
 import { IslamskaZajednicaLogo } from './IslamskaZajednicaLogo';
+import { TextHutba } from '../services/supabaseService';
 
 interface HutbaModalProps {
-  hutba: Hutba | null;
+  hutba: TextHutba | null;
   onClose: () => void;
-  onPlayAudio?: (hutba: Hutba) => void;
 }
 
-export const HutbaModal: React.FC<HutbaModalProps> = ({ hutba, onClose, onPlayAudio }) => {
+export const HutbaModal: React.FC<HutbaModalProps> = ({ hutba, onClose }) => {
   const [copied, setCopied] = useState(false);
   const [fontSize, setFontSize] = useState<'normal' | 'large'>('normal');
 
   if (!hutba) return null;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(`${hutba.title}\n${hutba.khatib} - ${hutba.date}\n\n${hutba.content}`);
+    navigator.clipboard.writeText(`${hutba.title}\n${hutba.author || 'Imam džemata Vreoca'} - ${hutba.date_str}\n\n${hutba.content}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -31,9 +30,9 @@ export const HutbaModal: React.FC<HutbaModalProps> = ({ hutba, onClose, onPlayAu
         {/* Modal Top Bar */}
         <div className="px-6 py-4 bg-stone-50 border-b border-stone-200/80 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <IslamskaZajednicaLogo size={24} />
+            <IslamskaZajednicaLogo size={26} />
             <span className="text-xs font-semibold text-stone-600 uppercase tracking-wider">
-              Džemat Vreoca • Arhiva hutbi
+              Džemat Vreoca • Tekstualna arhiva hutbi
             </span>
           </div>
 
@@ -42,7 +41,7 @@ export const HutbaModal: React.FC<HutbaModalProps> = ({ hutba, onClose, onPlayAu
             <div className="flex items-center bg-white border border-stone-200 rounded-lg p-0.5 text-xs">
               <button
                 onClick={() => setFontSize('normal')}
-                className={`px-2 py-1 rounded font-serif ${
+                className={`px-2 py-1 rounded font-serif cursor-pointer ${
                   fontSize === 'normal' ? 'bg-stone-100 font-bold text-stone-900' : 'text-stone-500'
                 }`}
                 title="Standardni font"
@@ -51,7 +50,7 @@ export const HutbaModal: React.FC<HutbaModalProps> = ({ hutba, onClose, onPlayAu
               </button>
               <button
                 onClick={() => setFontSize('large')}
-                className={`px-2 py-1 rounded font-serif text-sm ${
+                className={`px-2 py-1 rounded font-serif text-sm cursor-pointer ${
                   fontSize === 'large' ? 'bg-stone-100 font-bold text-stone-900' : 'text-stone-500'
                 }`}
                 title="Veći font"
@@ -86,23 +85,21 @@ export const HutbaModal: React.FC<HutbaModalProps> = ({ hutba, onClose, onPlayAu
           </div>
         </div>
 
-        {/* Modal Content - Reader Style */}
+        {/* Modal Content - Pure Text Reader Style */}
         <div className="p-6 sm:p-10 max-h-[75vh] overflow-y-auto">
           {/* Metadata */}
           <div className="flex flex-wrap items-center gap-3 text-xs text-stone-500 mb-4">
-            <span className="bg-emerald-50 text-emerald-800 font-semibold px-2.5 py-1 rounded-full border border-emerald-200/60">
+            <span className="bg-emerald-50 text-[#1b3d2f] font-semibold px-2.5 py-1 rounded-full border border-emerald-200/60">
               {hutba.category}
             </span>
             <div className="flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
-              <span>{hutba.date}</span>
+              <span>{hutba.date_str}</span>
             </div>
             <span>•</span>
-            <div>{hutba.hijriDate}</div>
-            <span>•</span>
             <div className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" />
-              <span>{hutba.durationMinutes} min čitanja</span>
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Tekstualna hutba</span>
             </div>
           </div>
 
@@ -112,8 +109,8 @@ export const HutbaModal: React.FC<HutbaModalProps> = ({ hutba, onClose, onPlayAu
           </h2>
 
           <div className="flex items-center gap-2 pb-6 mb-6 border-b border-stone-100 text-sm text-stone-600">
-            <User className="w-4 h-4 text-emerald-700" />
-            <span>Khatib: <strong className="text-stone-900 font-medium">{hutba.khatib}</strong></span>
+            <User className="w-4 h-4 text-[#1b3d2f]" />
+            <span>Khatib: <strong className="text-stone-900 font-medium">{hutba.author || 'Imam džemata Vreoca'}</strong></span>
           </div>
 
           {/* Text Body */}
@@ -124,28 +121,16 @@ export const HutbaModal: React.FC<HutbaModalProps> = ({ hutba, onClose, onPlayAu
           >
             {hutba.content}
           </div>
-
-          {/* Tags */}
-          <div className="mt-8 pt-6 border-t border-stone-100 flex flex-wrap gap-2">
-            {hutba.tags.map((tag) => (
-              <span
-                key={tag}
-                className="text-xs bg-stone-100 text-stone-600 px-3 py-1 rounded-full"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
         </div>
 
         {/* Footer */}
         <div className="px-6 py-4 bg-stone-50 border-t border-stone-200 flex items-center justify-between">
           <span className="text-xs text-stone-500">
-            Vreočka džamija • Džuma namaz
+            Džamija Vreoca • Džuma namaz
           </span>
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-stone-900 text-white hover:bg-stone-800 text-xs font-semibold rounded-full transition-colors cursor-pointer"
+            className="px-5 py-2 bg-[#1b3d2f] text-white hover:bg-[#142e23] text-xs font-semibold rounded-xl transition-colors cursor-pointer"
           >
             Zatvori pregled
           </button>

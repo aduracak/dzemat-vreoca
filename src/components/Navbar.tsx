@@ -29,10 +29,12 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'pocetna', label: 'Početna' },
     { id: 'o-nama', label: 'Džemat', hasDropdown: true },
     { id: 'vaktija', label: 'Vaktija' },
+    { id: 'pitanja-odgovori', label: 'Pitanja i odgovori' },
     { id: 'hutbe', label: 'Hutbe' },
     { id: 'aktivnosti', label: 'Aktivnosti' },
     { id: 'kontakt', label: 'Kontakt' },
   ];
+
 
   return (
     <header

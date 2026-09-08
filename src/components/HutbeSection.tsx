@@ -1,33 +1,32 @@
-import React, { useState } from 'react';
-import { HUTBE_ARCHIVE } from '../data/hutbeData';
-import { Hutba } from '../types';
-import { BookOpen, Search, Filter, Volume2, Calendar, Clock, ChevronRight, Play, Pause, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BookOpen, Search, Calendar, ChevronRight, FileText } from 'lucide-react';
 import { HutbaModal } from './HutbaModal';
+import { getHutbe, TextHutba } from '../services/supabaseService';
 
 export const HutbeSection: React.FC = () => {
+  const [hutbeList, setHutbeList] = useState<TextHutba[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Sve');
-  const [activeReadingHutba, setActiveReadingHutba] = useState<Hutba | null>(null);
-  const [playingHutbaId, setPlayingHutbaId] = useState<string | null>(null);
+  const [activeReadingHutba, setActiveReadingHutba] = useState<TextHutba | null>(null);
 
-  const categories = ['Sve', 'Ahlak', 'Porodica', 'Zajednica', 'Znanje'];
+  const categories = ['Sve', 'Zajedništvo', 'Porodica i odgoj', 'Duhovnost', 'Ahlak'];
 
-  const filteredHutbe = HUTBE_ARCHIVE.filter((hutba) => {
+  useEffect(() => {
+    getHutbe().then((data) => {
+      setHutbeList(data);
+      setLoading(false);
+    });
+  }, []);
+
+  const filteredHutbe = hutbeList.filter((hutba) => {
     const matchesCategory = selectedCategory === 'Sve' || hutba.category === selectedCategory;
     const matchesSearch =
       hutba.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       hutba.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      hutba.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+      hutba.content.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
-
-  const handleToggleAudio = (hutbaId: string) => {
-    if (playingHutbaId === hutbaId) {
-      setPlayingHutbaId(null);
-    } else {
-      setPlayingHutbaId(hutbaId);
-    }
-  };
 
   return (
     <section id="hutbe" className="py-20 sm:py-28 bg-[#fafaf9] border-t border-stone-200/70">
@@ -35,15 +34,15 @@ export const HutbeSection: React.FC = () => {
         {/* Section Title */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 sm:mb-14 gap-6">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-800 text-xs font-semibold mb-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-[#1b3d2f] text-xs font-semibold mb-3">
               <BookOpen className="w-3.5 h-3.5" />
               <span>Duhovna riznica džemata</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-stone-900 font-serif">
-              Arhiva petkovnih hutbi
+              Tekstualna arhiva petkovnih hutbi
             </h2>
             <p className="mt-3 text-base sm:text-lg text-stone-600">
-              Inspirativne poruke, predavanja i savjeti iz minbera džamije u Vreocima. Dostupno za čitanje i slušanje.
+              Inspirativne poruke, predavanja i savjeti sa minbera džamije u Vreocima.
             </p>
           </div>
 
@@ -52,10 +51,10 @@ export const HutbeSection: React.FC = () => {
             <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Pretraži hutbe po temi ili riječi..."
+              placeholder="Pretraži tekstove hutbi..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-stone-200 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 transition-all shadow-2xs"
+              className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-stone-200 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#1b3d2f]/20 focus:border-[#1b3d2f] transition-all shadow-2xs"
             />
           </div>
         </div>
@@ -66,9 +65,9 @@ export const HutbeSection: React.FC = () => {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 selectedCategory === cat
-                  ? 'bg-[#1e4734] text-white shadow-2xs'
+                  ? 'bg-[#1b3d2f] text-white shadow-2xs'
                   : 'bg-white text-stone-600 hover:bg-stone-100 border border-stone-200/80'
               }`}
             >
@@ -78,11 +77,19 @@ export const HutbeSection: React.FC = () => {
         </div>
 
         {/* Hutbe Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredHutbe.map((hutba) => {
-            const isPlaying = playingHutbaId === hutba.id;
-
-            return (
+        {loading ? (
+          <div className="py-16 text-center text-stone-500 text-sm">
+            Učitavanje hutbi...
+          </div>
+        ) : filteredHutbe.length === 0 ? (
+          <div className="bg-white rounded-3xl p-12 text-center border border-stone-200 max-w-md mx-auto">
+            <FileText className="w-12 h-12 text-stone-300 mx-auto mb-3" />
+            <h3 className="text-lg font-bold text-stone-800 font-serif">Nema pronađenih hutbi</h3>
+            <p className="text-xs text-stone-500 mt-1">Pokušajte odabrati drugu kategoriju ili promijeniti pretragu.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredHutbe.map((hutba) => (
               <div
                 key={hutba.id}
                 className="bg-white rounded-3xl p-6 sm:p-7 border border-stone-200/80 hover:border-stone-300 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between group"
@@ -90,92 +97,52 @@ export const HutbeSection: React.FC = () => {
                 <div>
                   {/* Card Header: Category & Date */}
                   <div className="flex items-center justify-between text-xs text-stone-500 mb-3">
-                    <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
+                    <span className="font-semibold text-[#1b3d2f] bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
                       {hutba.category}
                     </span>
                     <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>{hutba.date}</span>
+                      <Calendar className="w-3.5 h-3.5 text-stone-400" />
+                      <span>{hutba.date_str}</span>
                     </div>
                   </div>
 
-                  {/* Title */}
-                  <h3 className="text-xl font-bold text-stone-900 font-serif leading-snug group-hover:text-emerald-900 transition-colors mb-3">
+                  {/* Hutba Title */}
+                  <h3 className="text-xl font-bold text-stone-900 font-serif tracking-tight mb-2.5 group-hover:text-[#1b3d2f] transition-colors">
                     {hutba.title}
                   </h3>
 
-                  {/* Summary */}
-                  <p className="text-sm text-stone-600 leading-relaxed line-clamp-3 mb-5">
+                  {/* Hutba Summary */}
+                  <p className="text-xs sm:text-sm text-stone-600 leading-relaxed line-clamp-3 mb-6">
                     {hutba.summary}
                   </p>
                 </div>
 
-                {/* Footer Controls */}
-                <div>
-                  {/* Audio Mini Player Banner if playing */}
-                  {isPlaying && (
-                    <div className="mb-4 p-3 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center justify-between text-xs text-emerald-900 animate-in fade-in duration-150">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping" />
-                        <span className="font-semibold">Reprodukcija hutbe u toku</span>
-                      </div>
-                      <span className="font-mono text-[11px]">14:20 min</span>
-                    </div>
-                  )}
-
-                  <div className="pt-4 border-t border-stone-100 flex items-center justify-between gap-2">
-                    {/* Listen Audio Button */}
-                    <button
-                      onClick={() => handleToggleAudio(hutba.id)}
-                      className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                        isPlaying
-                          ? 'bg-emerald-800 text-white shadow-xs'
-                          : 'bg-stone-100 hover:bg-stone-200/80 text-stone-700'
-                      }`}
-                    >
-                      {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                      <span>{isPlaying ? 'Pauziraj' : 'Poslušaj'}</span>
-                    </button>
-
-                    {/* Read Full Button */}
-                    <button
-                      onClick={() => setActiveReadingHutba(hutba)}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-900 hover:text-emerald-950 px-3 py-2 rounded-xl hover:bg-emerald-50 transition-colors cursor-pointer"
-                    >
-                      <span>Pročitaj tekst</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
+                {/* Card Footer: Read Action */}
+                <div className="pt-4 border-t border-stone-100 flex items-center justify-between">
+                  <div className="flex items-center gap-1 text-xs text-stone-400">
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Tekstualna hutba</span>
                   </div>
+
+                  <button
+                    onClick={() => setActiveReadingHutba(hutba)}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#1b3d2f] group-hover:translate-x-0.5 transition-transform cursor-pointer"
+                  >
+                    <span>Pročitaj cijelu hutbu</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
-            );
-          })}
-        </div>
-
-        {filteredHutbe.length === 0 && (
-          <div className="text-center py-16 bg-white rounded-3xl border border-dashed border-stone-300">
-            <BookOpen className="w-10 h-10 text-stone-400 mx-auto mb-3" />
-            <p className="text-stone-600 font-medium">Nema pronađenih hutbi za odabrani pojam.</p>
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('Sve');
-              }}
-              className="mt-3 text-xs font-semibold text-emerald-800 hover:underline"
-            >
-              Poništi filtere
-            </button>
+            ))}
           </div>
         )}
       </div>
 
       {/* Reader Modal */}
-      {activeReadingHutba && (
-        <HutbaModal
-          hutba={activeReadingHutba}
-          onClose={() => setActiveReadingHutba(null)}
-        />
-      )}
+      <HutbaModal
+        hutba={activeReadingHutba}
+        onClose={() => setActiveReadingHutba(null)}
+      />
     </section>
   );
 };

@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { BookOpen, GraduationCap, Calendar, Clock, CheckCircle2, UserCheck, Send, Check } from 'lucide-react';
+import { submitMektebEnrollment } from '../services/supabaseService';
 
 export const MektebSection: React.FC = () => {
   const [enrollModalOpen, setEnrollModalOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
     parentName: '',
     childName: '',
@@ -13,22 +16,41 @@ export const MektebSection: React.FC = () => {
     group: 'Početni nivo (učenje ilmihala i sura)',
   });
 
-  const handleSubmitEnrollment = (e: React.FormEvent) => {
+  const handleSubmitEnrollment = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setEnrollModalOpen(false);
-      setFormData({
-        parentName: '',
-        childName: '',
-        birthYear: '',
-        phone: '',
-        email: '',
-        group: 'Početni nivo (učenje ilmihala i sura)',
-      });
-    }, 2000);
+    setSubmitting(true);
+    setErrorMessage('');
+
+    const res = await submitMektebEnrollment({
+      parent_name: formData.parentName,
+      child_name: formData.childName,
+      birth_year: formData.birthYear,
+      phone: formData.phone,
+      email: formData.email,
+      group_level: formData.group,
+    });
+
+    setSubmitting(false);
+
+    if (res.success) {
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setEnrollModalOpen(false);
+        setFormData({
+          parentName: '',
+          childName: '',
+          birthYear: '',
+          phone: '',
+          email: '',
+          group: 'Početni nivo (učenje ilmihala i sura)',
+        });
+      }, 3000);
+    } else {
+      setErrorMessage(res.error || 'Došlo je do greške prilikom slanja prijave.');
+    }
   };
+
 
   const groups = [
     {
@@ -213,6 +235,12 @@ export const MektebSection: React.FC = () => {
                   </select>
                 </div>
 
+                {errorMessage && (
+                  <div className="p-3 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs">
+                    {errorMessage}
+                  </div>
+                )}
+
                 <div className="pt-3 flex items-center justify-end gap-3">
                   <button
                     type="button"
@@ -223,12 +251,14 @@ export const MektebSection: React.FC = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2.5 bg-[#1e4734] hover:bg-[#163627] text-white rounded-xl font-semibold cursor-pointer"
+                    disabled={submitting}
+                    className="px-5 py-2.5 bg-[#1e4734] hover:bg-[#163627] disabled:opacity-50 text-white rounded-xl font-semibold cursor-pointer shadow-xs"
                   >
-                    Pošalji prijavu
+                    {submitting ? 'Slanje...' : 'Pošalji prijavu'}
                   </button>
                 </div>
               </form>
+
             )}
           </div>
         </div>
