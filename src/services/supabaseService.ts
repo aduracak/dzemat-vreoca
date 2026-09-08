@@ -1,10 +1,16 @@
 /// <reference types="vite/client" />
 import { createClient } from '@supabase/supabase-js';
 
-// Environment varijable za Supabase
+// Environment varijable za Supabase (podržava i VITE_ i NEXT_PUBLIC_ prefikse)
 const env = (import.meta as any).env || {};
-const supabaseUrl = env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl =
+  env.VITE_SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey =
+  env.VITE_SUPABASE_ANON_KEY ||
+  env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  '';
+
 
 // Inicijalizacija Supabase klijenta (ako su ključevi definisani)
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
