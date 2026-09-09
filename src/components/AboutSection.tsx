@@ -4,8 +4,8 @@ import { IslamskaZajednicaLogo } from './IslamskaZajednicaLogo';
 
 export const AboutSection: React.FC<{ onOpenDonation: () => void }> = ({ onOpenDonation }) => {
   const stats = [
-    { number: '600+', label: 'Džematskih porodica', sub: 'Aktivni članovi džemata' },
-    { number: '85+', label: 'Polaznika mekteba', sub: 'Dječaci i djevojčice u mektebu' },
+    { number: '300+', label: 'Džematskih porodica', sub: 'Aktivni članovi džemata' },
+    { number: '20+', label: 'Polaznika mekteba', sub: 'Dječaci i djevojčice u mektebu' },
     { number: '5', label: 'Dnevnih namaza', sub: 'Otvorena džamija za svaki vakat' },
     { number: '100%', label: 'Vakufsko povjerenje', sub: 'Transparentan rad i odgovornost' },
   ];

@@ -30,9 +30,11 @@ import { IslamskaZajednicaLogo } from '../IslamskaZajednicaLogo';
 import {
   getAllMektebPrijave,
   updateMektebStatus,
+  deleteMektebPrijava,
   exportMektebToCSV,
   getAllQuestionsForAdmin,
   answerQuestion,
+  deleteQuestion,
   getHutbe,
   createHutba,
   deleteHutba,
@@ -168,6 +170,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
       `Esselamu alejkum,\n\nVaše pitanje:\n"${selectedPitanje.question}"\n\nOdgovor Imama:\n${odgovorText}\n\nMahsuz selam,\nImam džemata Vreoca\nvreoca@medzlis-sarajevo.ba`
     );
     window.open(`mailto:${selectedPitanje.sender_contact}?subject=${subject}&body=${body}`);
+  };
+
+  const handleDeleteQuestion = async (id: number | string | undefined) => {
+    if (!id) return;
+    if (confirm('Da li ste sigurni da želite obrisati ovo pitanje?')) {
+      await deleteQuestion(id);
+      setSelectedPitanje(null);
+      const p = await getAllQuestionsForAdmin();
+      setPitanja(p);
+    }
+  };
+
+  const handleDeleteMekteb = async (id: number | string | undefined) => {
+    if (!id) return;
+    if (confirm('Da li ste sigurni da želite obrisati ovu prijavu za mekteb?')) {
+      await deleteMektebPrijava(id);
+      const m = await getAllMektebPrijave();
+      setMektebPrijave(m);
+    }
   };
 
   // Hutbe akcije
@@ -565,7 +586,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   <div key={p.id} className="py-2.5 border-b border-stone-100 last:border-0 flex items-center justify-between text-xs">
                     <div>
                       <div className="font-bold text-stone-900">{p.child_name} ({p.birth_year}.)</div>
-                      <div className="text-[11px] text-stone-500">Roditelj: {p.parent_name} • {p.phone}</div>
+                      <div className="text-[11px] text-stone-500">Otac: {p.parent_name_father || (p as any).parent_name || '—'} • {p.phone}</div>
                     </div>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${p.status === 'upisano' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'}`}>
                       {p.status === 'upisano' ? 'Upisano' : 'Na čekanju'}
@@ -658,7 +679,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                         <th className="py-3.5 px-4">Ime djeteta</th>
                         <th className="py-3.5 px-4">Godište</th>
                         <th className="py-3.5 px-4">Grupa / Nivo</th>
-                        <th className="py-3.5 px-4">Roditelj</th>
+                        <th className="py-3.5 px-4">Otac</th>
+                        <th className="py-3.5 px-4">Majka</th>
+                        <th className="py-3.5 px-4">Razred</th>
                         <th className="py-3.5 px-4">Kontakt telefon</th>
                         <th className="py-3.5 px-4">Status</th>
                         <th className="py-3.5 px-4 text-right">Promjena statusa</th>
@@ -677,7 +700,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                             {p.group_level}
                           </td>
                           <td className="py-3.5 px-4 text-stone-700">
-                            {p.parent_name}
+                            {p.parent_name_father || (p as any).parent_name || '—'}
+                          </td>
+                          <td className="py-3.5 px-4 text-stone-700">
+                            {p.parent_name_mother || '—'}
+                          </td>
+                          <td className="py-3.5 px-4 text-stone-600">
+                            {p.school_grade ? (
+                              <span title={p.school_name || ''}>{p.school_grade}{p.school_name ? ` • ${p.school_name}` : ''}</span>
+                            ) : (
+                              <span className="text-stone-400">—</span>
+                            )}
                           </td>
                           <td className="py-3.5 px-4 font-mono">
                             <a
@@ -706,17 +739,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                             </span>
                           </td>
                           <td className="py-3.5 px-4 text-right">
-                            <select
-                              value={p.status || 'na_cekanju'}
-                              onChange={(e) =>
-                                handleStatusChange(p.id, e.target.value as any)
-                              }
-                              className="bg-stone-100 border border-stone-200 rounded-lg px-2.5 py-1 text-[11px] font-semibold cursor-pointer focus:outline-none"
-                            >
-                              <option value="na_cekanju">Na čekanju</option>
-                              <option value="upisano">Označi kao Upisano</option>
-                              <option value="arhivirano">Arhiviraj</option>
-                            </select>
+                            <div className="flex items-center justify-end gap-2">
+                              <select
+                                value={p.status || 'na_cekanju'}
+                                onChange={(e) =>
+                                  handleStatusChange(p.id, e.target.value as any)
+                                }
+                                className="bg-stone-100 border border-stone-200 rounded-lg px-2.5 py-1 text-[11px] font-semibold cursor-pointer focus:outline-none"
+                              >
+                                <option value="na_cekanju">Na čekanju</option>
+                                <option value="upisano">Označi kao Upisano</option>
+                                <option value="arhivirano">Arhiviraj</option>
+                              </select>
+                              <button
+                                onClick={() => handleDeleteMekteb(p.id)}
+                                className="text-red-500 hover:text-red-700 p-1 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+                                title="Obriši prijavu"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -891,17 +933,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       </div>
                     )}
 
-                    <div className="pt-3 flex items-center justify-between">
-                      {selectedPitanje.sender_contact && (
+                    <div className="pt-3 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        {selectedPitanje.sender_contact && (
+                          <button
+                            type="button"
+                            onClick={handleSendEmailReply}
+                            className="inline-flex items-center gap-1.5 text-xs text-[#1b3d2f] font-semibold hover:underline cursor-pointer"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                            <span>Pošalji na email džematlije</span>
+                          </button>
+                        )}
                         <button
                           type="button"
-                          onClick={handleSendEmailReply}
-                          className="inline-flex items-center gap-1.5 text-xs text-[#1b3d2f] font-semibold hover:underline cursor-pointer"
+                          onClick={() => handleDeleteQuestion(selectedPitanje.id)}
+                          className="inline-flex items-center gap-1.5 text-xs text-red-600 hover:text-red-800 font-semibold hover:underline cursor-pointer"
                         >
-                          <Send className="w-3.5 h-3.5" />
-                          <span>Pošalji na email džematlije</span>
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Obriši pitanje</span>
                         </button>
-                      )}
+                      </div>
 
                       <button
                         type="submit"

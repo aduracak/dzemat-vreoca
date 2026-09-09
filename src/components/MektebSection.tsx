@@ -8,12 +8,15 @@ export const MektebSection: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
-    parentName: '',
+    fatherName: '',
+    motherName: '',
     childName: '',
     birthYear: '',
     phone: '',
     email: '',
     group: 'Početni nivo (učenje ilmihala i sura)',
+    schoolGrade: '',
+    schoolName: '',
   });
 
   const handleSubmitEnrollment = async (e: React.FormEvent) => {
@@ -22,12 +25,15 @@ export const MektebSection: React.FC = () => {
     setErrorMessage('');
 
     const res = await submitMektebEnrollment({
-      parent_name: formData.parentName,
+      parent_name_father: formData.fatherName,
+      parent_name_mother: formData.motherName,
       child_name: formData.childName,
       birth_year: formData.birthYear,
       phone: formData.phone,
       email: formData.email,
       group_level: formData.group,
+      school_grade: formData.schoolGrade,
+      school_name: formData.schoolName || undefined,
     });
 
     setSubmitting(false);
@@ -38,12 +44,15 @@ export const MektebSection: React.FC = () => {
         setSubmitted(false);
         setEnrollModalOpen(false);
         setFormData({
-          parentName: '',
+          fatherName: '',
+          motherName: '',
           childName: '',
           birthYear: '',
           phone: '',
           email: '',
           group: 'Početni nivo (učenje ilmihala i sura)',
+          schoolGrade: '',
+          schoolName: '',
         });
       }, 3000);
     } else {
@@ -71,6 +80,25 @@ export const MektebSection: React.FC = () => {
       time: 'Subota i Nedjelja, 13:30 – 15:00',
       description: 'Učenje Kur\'ana naglas, usavršavanje tedžvida, hifz odabranih sura i islamska etika.',
     },
+  ];
+
+  // Opcije za razred škole
+  const schoolGradeOptions = [
+    { label: 'Odaberite razred', value: '' },
+    { label: '1. razred osnovne škole', value: '1. razred OŠ' },
+    { label: '2. razred osnovne škole', value: '2. razred OŠ' },
+    { label: '3. razred osnovne škole', value: '3. razred OŠ' },
+    { label: '4. razred osnovne škole', value: '4. razred OŠ' },
+    { label: '5. razred osnovne škole', value: '5. razred OŠ' },
+    { label: '6. razred osnovne škole', value: '6. razred OŠ' },
+    { label: '7. razred osnovne škole', value: '7. razred OŠ' },
+    { label: '8. razred osnovne škole', value: '8. razred OŠ' },
+    { label: '9. razred osnovne škole', value: '9. razred OŠ' },
+    { label: 'I razred srednje škole', value: 'I razred SŠ' },
+    { label: 'II razred srednje škole', value: 'II razred SŠ' },
+    { label: 'III razred srednje škole', value: 'III razred SŠ' },
+    { label: 'IV razred srednje škole', value: 'IV razred SŠ' },
+    { label: 'Student / Ostalo', value: 'Student/Ostalo' },
   ];
 
   return (
@@ -135,7 +163,7 @@ export const MektebSection: React.FC = () => {
       {/* Online Enrollment Modal */}
       {enrollModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-stone-200 p-6 sm:p-8">
+          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-stone-200 p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-bold text-stone-900 font-serif mb-1">
               Elektronska prijava za mekteb
             </h3>
@@ -155,20 +183,37 @@ export const MektebSection: React.FC = () => {
               </div>
             ) : (
               <form onSubmit={handleSubmitEnrollment} className="space-y-4 text-xs">
+                {/* Ime i prezime oca */}
                 <div>
                   <label className="block font-semibold text-stone-700 mb-1">
-                    Ime i prezime roditelja / staratelja
+                    Ime i prezime oca
                   </label>
                   <input
                     type="text"
                     required
                     placeholder="npr. Adnan Hadžić"
-                    value={formData.parentName}
-                    onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
+                    value={formData.fatherName}
+                    onChange={(e) => setFormData({ ...formData, fatherName: e.target.value })}
                     className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
                   />
                 </div>
 
+                {/* Ime i prezime majke */}
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    Ime i prezime majke
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="npr. Amina Hadžić"
+                    value={formData.motherName}
+                    onChange={(e) => setFormData({ ...formData, motherName: e.target.value })}
+                    className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
+                  />
+                </div>
+
+                {/* Dijete + godište */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block font-semibold text-stone-700 mb-1">
@@ -200,6 +245,40 @@ export const MektebSection: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Razred škole + Naziv škole */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-stone-700 mb-1">
+                      Razred u školi
+                    </label>
+                    <select
+                      required
+                      value={formData.schoolGrade}
+                      onChange={(e) => setFormData({ ...formData, schoolGrade: e.target.value })}
+                      className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
+                    >
+                      {schoolGradeOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value} disabled={opt.value === ''}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-stone-700 mb-1">
+                      Naziv škole <span className="text-stone-400 font-normal">(opciono)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="npr. OŠ Hrasno"
+                      value={formData.schoolName}
+                      onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
+                      className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
+                    />
+                  </div>
+                </div>
+
+                {/* Telefon */}
                 <div>
                   <label className="block font-semibold text-stone-700 mb-1">
                     Kontakt telefon (roditelj)
@@ -214,6 +293,7 @@ export const MektebSection: React.FC = () => {
                   />
                 </div>
 
+                {/* Mektebski nivo */}
                 <div>
                   <label className="block font-semibold text-stone-700 mb-1">
                     Odaberite mektebski nivo

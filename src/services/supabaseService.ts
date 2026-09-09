@@ -30,12 +30,15 @@ export const supabase = isSupabaseConfigured
 
 export interface MektebPrijava {
   id?: number | string;
-  parent_name: string;
+  parent_name_father: string;
+  parent_name_mother: string;
   child_name: string;
   birth_year: number | string;
   phone: string;
   email?: string;
   group_level: string;
+  school_grade?: string;
+  school_name?: string;
   status?: 'na_cekanju' | 'upisano' | 'arhivirano';
   notes?: string;
   created_at?: string;
@@ -214,7 +217,11 @@ const INITIAL_AKTIVNOSTI: Aktivnost[] = [
 function getLocal<T>(key: string, defaultVal: T): T {
   try {
     const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultVal;
+    if (item === null) {
+      localStorage.setItem(key, JSON.stringify(defaultVal));
+      return defaultVal;
+    }
+    return JSON.parse(item);
   } catch {
     return defaultVal;
   }
@@ -239,12 +246,15 @@ export async function submitMektebEnrollment(data: MektebPrijava): Promise<{ suc
   try {
     if (supabase) {
       const { error } = await supabase.from('mekteb_prijave').insert([{
-        parent_name: data.parent_name,
+        parent_name_father: data.parent_name_father,
+        parent_name_mother: data.parent_name_mother,
         child_name: data.child_name,
         birth_year: Number(data.birth_year),
         phone: data.phone,
         email: data.email || null,
         group_level: data.group_level,
+        school_grade: data.school_grade || null,
+        school_name: data.school_name || null,
         status: 'na_cekanju',
       }]);
       if (error) throw error;
@@ -456,10 +466,10 @@ export async function updateMektebStatus(
  * 8. Export mekteb prijava u CSV
  */
 export function exportMektebToCSV(prijave: MektebPrijava[]): void {
-  const headers = 'ID,Ime djeteta,Godiste,Nivo mekteba,Ime roditelja,Telefon,Email,Status,Datum prijave\n';
+  const headers = 'ID,Ime djeteta,Godiste,Nivo mekteba,Ime oca,Ime majke,Razred,Skola,Telefon,Email,Status,Datum prijave\n';
   const rows = prijave
     .map((p) =>
-      `"${p.id || ''}","${p.child_name}","${p.birth_year}","${p.group_level}","${p.parent_name}","${p.phone}","${p.email || ''}","${p.status || 'na_cekanju'}","${p.created_at || ''}"`
+      `"${p.id || ''}","${p.child_name}","${p.birth_year}","${p.group_level}","${p.parent_name_father || (p as any).parent_name || ''}","${p.parent_name_mother || ''}","${p.school_grade || ''}","${p.school_name || ''}","${p.phone}","${p.email || ''}","${p.status || 'na_cekanju'}","${p.created_at || ''}"`
     )
     .join('\n');
 
@@ -483,13 +493,16 @@ export async function getHutbe(): Promise<TextHutba[]> {
         .from('hutbe')
         .select('*')
         .order('id', { ascending: false });
-      if (error) throw error;
-      return data && data.length > 0 ? data : INITIAL_HUTBE;
+      if (error) {
+        console.warn('Supabase getHutbe fallback:', error);
+        return getLocal<TextHutba[]>(LOCAL_STORAGE_KEYS.HUTBE, INITIAL_HUTBE);
+      }
+      return data || [];
     } else {
       return getLocal<TextHutba[]>(LOCAL_STORAGE_KEYS.HUTBE, INITIAL_HUTBE);
     }
   } catch {
-    return INITIAL_HUTBE;
+    return getLocal<TextHutba[]>(LOCAL_STORAGE_KEYS.HUTBE, INITIAL_HUTBE);
   }
 }
 
@@ -529,11 +542,14 @@ export async function createHutba(data: TextHutba): Promise<{ success: boolean; 
 export async function deleteHutba(id: number | string): Promise<{ success: boolean }> {
   try {
     if (supabase) {
-      await supabase.from('hutbe').delete().eq('id', id);
-    } else {
-      const all = getLocal<TextHutba[]>(LOCAL_STORAGE_KEYS.HUTBE, INITIAL_HUTBE);
-      setLocal(LOCAL_STORAGE_KEYS.HUTBE, all.filter((h) => h.id !== id));
+      try {
+        await supabase.from('hutbe').delete().eq('id', id);
+      } catch (e) {
+        console.warn('Supabase deleteHutba error:', e);
+      }
     }
+    const all = getLocal<TextHutba[]>(LOCAL_STORAGE_KEYS.HUTBE, INITIAL_HUTBE);
+    setLocal(LOCAL_STORAGE_KEYS.HUTBE, all.filter((h) => String(h.id) !== String(id)));
     return { success: true };
   } catch {
     return { success: false };
@@ -551,13 +567,16 @@ export async function getActivities(): Promise<Aktivnost[]> {
         .select('*')
         .eq('is_active', true)
         .order('id', { ascending: false });
-      if (error) throw error;
-      return data && data.length > 0 ? data : INITIAL_AKTIVNOSTI;
+      if (error) {
+        console.warn('Supabase getActivities fallback:', error);
+        return getLocal<Aktivnost[]>(LOCAL_STORAGE_KEYS.AKTIVNOSTI, INITIAL_AKTIVNOSTI);
+      }
+      return data || [];
     } else {
       return getLocal<Aktivnost[]>(LOCAL_STORAGE_KEYS.AKTIVNOSTI, INITIAL_AKTIVNOSTI);
     }
   } catch {
-    return INITIAL_AKTIVNOSTI;
+    return getLocal<Aktivnost[]>(LOCAL_STORAGE_KEYS.AKTIVNOSTI, INITIAL_AKTIVNOSTI);
   }
 }
 
@@ -600,11 +619,54 @@ export async function createActivity(data: Aktivnost): Promise<{ success: boolea
 export async function deleteActivity(id: number | string): Promise<{ success: boolean }> {
   try {
     if (supabase) {
-      await supabase.from('aktivnosti').delete().eq('id', id);
-    } else {
-      const all = getLocal<Aktivnost[]>(LOCAL_STORAGE_KEYS.AKTIVNOSTI, INITIAL_AKTIVNOSTI);
-      setLocal(LOCAL_STORAGE_KEYS.AKTIVNOSTI, all.filter((a) => a.id !== id));
+      try {
+        await supabase.from('aktivnosti').delete().eq('id', id);
+      } catch (e) {
+        console.warn('Supabase deleteActivity error:', e);
+      }
     }
+    const all = getLocal<Aktivnost[]>(LOCAL_STORAGE_KEYS.AKTIVNOSTI, INITIAL_AKTIVNOSTI);
+    setLocal(LOCAL_STORAGE_KEYS.AKTIVNOSTI, all.filter((a) => String(a.id) !== String(id)));
+    return { success: true };
+  } catch {
+    return { success: false };
+  }
+}
+
+/**
+ * 14a. Brisanje Mekteb Prijave (Admin)
+ */
+export async function deleteMektebPrijava(id: number | string): Promise<{ success: boolean }> {
+  try {
+    if (supabase) {
+      try {
+        await supabase.from('mekteb_prijave').delete().eq('id', id);
+      } catch (e) {
+        console.warn('Supabase deleteMekteb error:', e);
+      }
+    }
+    const all = getLocal<MektebPrijava[]>(LOCAL_STORAGE_KEYS.MEKTEB, []);
+    setLocal(LOCAL_STORAGE_KEYS.MEKTEB, all.filter((p) => String(p.id) !== String(id)));
+    return { success: true };
+  } catch {
+    return { success: false };
+  }
+}
+
+/**
+ * 14b. Brisanje Pitanja za Imama (Admin)
+ */
+export async function deleteQuestion(id: number | string): Promise<{ success: boolean }> {
+  try {
+    if (supabase) {
+      try {
+        await supabase.from('pitanja_imamu').delete().eq('id', id);
+      } catch (e) {
+        console.warn('Supabase deleteQuestion error:', e);
+      }
+    }
+    const all = getLocal<PitanjeImamu[]>(LOCAL_STORAGE_KEYS.PITANJA, INITIAL_PITANJA);
+    setLocal(LOCAL_STORAGE_KEYS.PITANJA, all.filter((q) => String(q.id) !== String(id)));
     return { success: true };
   } catch {
     return { success: false };
@@ -679,11 +741,14 @@ export async function getNewsletterSubscribers(): Promise<NewsletterSubscriber[]
 export async function deleteNewsletterSubscriber(id: number | string): Promise<{ success: boolean }> {
   try {
     if (supabase) {
-      await supabase.from('newsletter_pretplatnici').delete().eq('id', id);
-    } else {
-      const all = getLocal<NewsletterSubscriber[]>(LOCAL_STORAGE_KEYS.NEWSLETTER, []);
-      setLocal(LOCAL_STORAGE_KEYS.NEWSLETTER, all.filter((s) => s.id !== id));
+      try {
+        await supabase.from('newsletter_pretplatnici').delete().eq('id', id);
+      } catch (e) {
+        console.warn('Supabase deleteNewsletter error:', e);
+      }
     }
+    const all = getLocal<NewsletterSubscriber[]>(LOCAL_STORAGE_KEYS.NEWSLETTER, []);
+    setLocal(LOCAL_STORAGE_KEYS.NEWSLETTER, all.filter((s) => String(s.id) !== String(id)));
     return { success: true };
   } catch {
     return { success: false };

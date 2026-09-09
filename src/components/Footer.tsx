@@ -206,6 +206,14 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDonation, onNavigate, onOp
               </li>
               <li>
                 <button
+                  onClick={() => onNavigate('rijec-vakifa')}
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
+                  Riječ vakifa (Historijat)
+                </button>
+              </li>
+              <li>
+                <button
                   onClick={() => onNavigate('vaktija')}
                   className="hover:text-white transition-colors cursor-pointer"
                 >

@@ -93,6 +93,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                         </button>
                         <button
                           onClick={() => {
+                            onNavigate('rijec-vakifa');
+                            setDzematDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100/80 hover:text-[#1b3d2f] rounded-lg transition-colors cursor-pointer"
+                        >
+                          Riječ vakifa
+                        </button>
+                        <button
+                          onClick={() => {
                             onNavigate('mekteb');
                             setDzematDropdownOpen(false);
                           }}
@@ -153,20 +162,36 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="md:hidden bg-white/95 backdrop-blur-xl border-b border-stone-200 px-5 pt-3 pb-6 mt-3 shadow-lg animate-in fade-in slide-in-from-top-4 duration-200">
           <div className="flex flex-col gap-1">
             {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  onNavigate(item.id);
-                  setMobileMenuOpen(false);
-                }}
-                className={`text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                  activeSection === item.id
-                    ? 'bg-emerald-50 text-[#1b3d2f] font-semibold'
-                    : 'text-stone-700 hover:bg-stone-50'
-                }`}
-              >
-                {item.label}
-              </button>
+              <React.Fragment key={item.id}>
+                <button
+                  onClick={() => {
+                    onNavigate(item.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                    activeSection === item.id
+                      ? 'bg-emerald-50 text-[#1b3d2f] font-semibold'
+                      : 'text-stone-700 hover:bg-stone-50'
+                  }`}
+                >
+                  {item.label}
+                </button>
+                {item.id === 'o-nama' && (
+                  <button
+                    onClick={() => {
+                      onNavigate('rijec-vakifa');
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`text-left px-7 py-2 rounded-xl text-xs font-medium transition-colors ${
+                      activeSection === 'rijec-vakifa'
+                        ? 'bg-emerald-50 text-[#1b3d2f] font-semibold'
+                        : 'text-stone-600 hover:bg-stone-50'
+                    }`}
+                  >
+                    ↳ Riječ vakifa (Nastanak)
+                  </button>
+                )}
+              </React.Fragment>
             ))}
 
             <div className="pt-3 mt-2 border-t border-stone-100 flex items-center justify-between">

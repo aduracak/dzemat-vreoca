@@ -10,6 +10,7 @@ import { VaktijaSection } from './components/VaktijaSection';
 import { PitanjaOdgovoriSection } from './components/PitanjaOdgovoriSection';
 import { HutbeSection } from './components/HutbeSection';
 import { AboutSection } from './components/AboutSection';
+import { RijecVakifaSection } from './components/RijecVakifaSection';
 import { MektebSection } from './components/MektebSection';
 import { ActivitiesSection } from './components/ActivitiesSection';
 import { LocationMapSection } from './components/LocationMapSection';
@@ -85,6 +86,9 @@ export default function App() {
 
         {/* About Džemat Vreoca */}
         <AboutSection onOpenDonation={() => setIsDonationOpen(true)} />
+
+        {/* Riječ Vakifa • Historijat i nastanak džamije */}
+        <RijecVakifaSection />
 
         {/* Mekteb & Youth Education */}
         <MektebSection />

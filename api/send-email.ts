@@ -39,7 +39,17 @@ export default async function handler(req: any, res: any) {
     // 1. MEKTEB PRIJAVA
     // -------------------------------------------------------------
     if (type === 'mekteb_prijava') {
-      const { parent_name, child_name, birth_year, phone, email, group_level } = data;
+      const {
+        parent_name_father,
+        parent_name_mother,
+        child_name,
+        birth_year,
+        phone,
+        email,
+        group_level,
+        school_grade,
+        school_name,
+      } = data;
 
       // Email imamu / džematu
       await resend.emails.send({
@@ -70,9 +80,23 @@ export default async function handler(req: any, res: any) {
                     <td style="padding: 8px 0; font-weight: bold; color: #047857;">${group_level}</td>
                   </tr>
                   <tr style="border-bottom: 1px solid #f5f5f4;">
-                    <td style="padding: 8px 0; color: #78716c;">Ime roditelja:</td>
-                    <td style="padding: 8px 0; font-weight: bold; color: #1c1917;">${parent_name}</td>
+                    <td style="padding: 8px 0; color: #78716c;">Ime oca:</td>
+                    <td style="padding: 8px 0; font-weight: bold; color: #1c1917;">${parent_name_father}</td>
                   </tr>
+                  <tr style="border-bottom: 1px solid #f5f5f4;">
+                    <td style="padding: 8px 0; color: #78716c;">Ime majke:</td>
+                    <td style="padding: 8px 0; font-weight: bold; color: #1c1917;">${parent_name_mother}</td>
+                  </tr>
+                  ${school_grade ? `
+                  <tr style="border-bottom: 1px solid #f5f5f4;">
+                    <td style="padding: 8px 0; color: #78716c;">Razred škole:</td>
+                    <td style="padding: 8px 0; font-weight: bold; color: #1c1917;">${school_grade}</td>
+                  </tr>` : ''}
+                  ${school_name ? `
+                  <tr style="border-bottom: 1px solid #f5f5f4;">
+                    <td style="padding: 8px 0; color: #78716c;">Naziv škole:</td>
+                    <td style="padding: 8px 0; font-weight: bold; color: #1c1917;">${school_name}</td>
+                  </tr>` : ''}
                   <tr style="border-bottom: 1px solid #f5f5f4;">
                     <td style="padding: 8px 0; color: #78716c;">Telefon:</td>
                     <td style="padding: 8px 0; font-weight: bold; color: #1c1917;">
@@ -101,7 +125,7 @@ export default async function handler(req: any, res: any) {
           html: `
             <div style="font-family: Arial, sans-serif; background-color: #f9f9f8; padding: 24px; color: #1c1917;">
               <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; border: 1px solid #e7e5e4; padding: 24px;">
-                <h3 style="color: #1b3d2f; margin-top: 0;">Esselamu alejkum poštovani ${parent_name},</h3>
+                <h3 style="color: #1b3d2f; margin-top: 0;">Esselamu alejkum,</h3>
                 <p style="font-size: 13px; line-height: 1.6;">Uspješno smo zaprimili vašu online prijavu za upis djeteta <strong>${child_name}</strong> u mekteb Džemata Vreoca (nivo: <em>${group_level}</em>).</p>
                 <p style="font-size: 13px; line-height: 1.6;">Imam džemata će vas kontaktirati prije početka nastave radi dogovora o rasporedu i preuzimanju udžbenika.</p>
                 <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #f5f5f4; font-size: 12px; color: #78716c;">
@@ -143,7 +167,7 @@ export default async function handler(req: any, res: any) {
                   Kategorija: <strong>${category || 'Opće'}</strong>
                 </p>
                 <div style="background-color: #f5f5f4; padding: 16px; border-radius: 12px; font-style: italic; font-size: 14px; margin: 16px 0; color: #292524;">
-                  „${question}“
+                  „${question}"
                 </div>
                 <p style="font-size: 12px; color: #78716c; margin-bottom: 0;">Obavijest je automatski generisana sa web stranice Džemata Vreoca.</p>
               </div>
@@ -151,7 +175,6 @@ export default async function handler(req: any, res: any) {
           </div>
         `,
       });
-
 
       return res.status(200).json({ success: true, message: 'Pitanje uspješno poslano imamu.' });
     }
